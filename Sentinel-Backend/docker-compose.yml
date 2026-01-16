@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  # 1. The Database
+  mysql:
+    image: mysql:8.0
+    container_name: sentinel-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sentinel_db
+    ports:
+      - "3307:3306" # Maps container port 3306 to localhost 3307
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # 2. Your Backend App
+  backend:
+    build: .
+    container_name: sentinel-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://sentinel-db:3306/sentinel_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+  # 3. Selenium Grid (Hub)
+  selenium-hub:
+    image: selenium/hub:4.16.1
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+
+  # 4. Chrome Worker (Node)
+  chrome:
+    image: selenium/node-chrome:4.16.1
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4444
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    shm_size: 2gb
+
+volumes:
+  mysql_data:

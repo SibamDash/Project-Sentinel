@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # 1. The Database
+  mysqldb:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sentinel_db
+    ports:
+      - "3307:3306" # Maps port 3307 on your laptop to 3306 in Docker
+
+  # 2. The Backend (Java)
+  backend:
+    build: ./Sentinel-Backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/sentinel_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SELENIUM_HEADLESS: "true"
+
+  # 3. The Frontend (React)
+  frontend:
+    build: ./sentinel-dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

@@ -1,0 +1,16 @@
+# --- Java & Maven ---
+target/
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# --- Node & React ---
+node_modules/
+build/
+dist/
+.env
+
+# --- Docker & System ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
